@@ -13,31 +13,40 @@ espacio entre palabra y palabra.
 import pandas as pd
 
 def ingest_data():
+    # Leer el archivo 'clusters_report.txt'
     with open('clusters_report.txt', 'r') as file:
         lines = file.readlines()
 
-    data = []
-    # Selecciona las líneas que contienen datos y omite las líneas vacías y las líneas de separación
+    # Crear listas para almacenar los datos
+    cluster = []
+    cantidad_de_palabras_clave = []
+    porcentaje_de_palabras_clave = []
+    principales_palabras_clave = []
+
+    # Iterar sobre las líneas del archivo y extraer los datos
     for line in lines:
         if line.strip() and not line.startswith('-'):
-            row = line.split()
-            # Unir las palabras clave con espacios múltiples
-            if len(row) > 4:
-                keywords = ' '.join(row[3:])
-                row = row[:3] + [keywords]
-            data.append(row)
+            # Dividir la línea en partes usando múltiples espacios como delimitador
+            parts = line.split()
 
-    # Crear DataFrame
-    df = pd.DataFrame(data, columns=['Cluster', 'Cantidad_de_palabras_clave', 'Porcentaje_de_palabras_clave', 'Palabras_clave'])
+            # Extraer los datos de cada columna
+            cluster.append(int(parts[0]))
+            cantidad_de_palabras_clave.append(int(parts[1]))
+            porcentaje_de_palabras_clave.append(float(parts[2].replace('%', '')))
+            principales_palabras_clave.append(', '.join(parts[3:]))
 
-    # Reemplazar porcentaje
-    df['Porcentaje_de_palabras_clave'] = df['Porcentaje_de_palabras_clave'].str.replace('%', '')
-
-    # Convertir columnas a tipos numéricos donde sea aplicable
-    df['Cantidad_de_palabras_clave'] = pd.to_numeric(df['Cantidad_de_palabras_clave'], errors='coerce')
+    # Crear el DataFrame
+    df = pd.DataFrame({
+        'cluster': cluster,
+        'cantidad_de_palabras_clave': cantidad_de_palabras_clave,
+        'porcentaje_de_palabras_clave': porcentaje_de_palabras_clave,
+        'principales_palabras_clave': principales_palabras_clave
+    })
 
     return df
 
-# Llamada a la función para obtener el DataFrame
+# Llamar a la función para obtener el DataFrame
 df = ingest_data()
 print(df)
+
+
